@@ -17,13 +17,20 @@
 5. **Sends a formatted email** through Office 365 containing all the relevant weather details.
 
 ---
-flowchart LR
-  A[Client or Caller] -->|HTTP POST JSON { city, email }| B[Logic App - HTTP Trigger]
-  B --> C[HTTP action - OpenWeather API]
-  C -->|JSON weather data| D[Parse JSON]
-  D --> E[Compose values - temp, feels_like, humidity, wind m/s → km/h]
-  E --> F[Office 365 - Send an email]
-  F --> G[Recipient Inbox]
+sequenceDiagram
+  autonumber
+  participant Client
+  participant LogicApp as Logic App
+  participant OpenWeather as OpenWeather API
+  participant O365 as Office 365
+
+  Client->>LogicApp: HTTP POST { city, email }
+  LogicApp->>OpenWeather: GET /data/2.5/weather?q=<city>&units=metric
+  OpenWeather-->>LogicApp: 200 OK (JSON)
+  LogicApp->>LogicApp: Parse JSON and convert wind m/s → km/h
+  LogicApp->>O365: Send email (HTML body)
+  O365-->>Client: Email delivered
+
 
   classDef azure fill:#2563eb,stroke:#1e40af,stroke-width:1,color:#fff
   classDef svc fill:#0ea5e9,stroke:#0369a1,stroke-width:1,color:#fff
