@@ -39,9 +39,6 @@ flowchart LR
   class C,F svc
 ```
 
-```markdown
-## Sequence
-```mermaid
 sequenceDiagram
   autonumber
   participant Client
@@ -49,10 +46,10 @@ sequenceDiagram
   participant OpenWeather as OpenWeather API
   participant O365 as Office 365
 
-  Client->>LogicApp: HTTP POST (city, email)
+  Client->>LogicApp: HTTP POST { city, email }
   LogicApp->>OpenWeather: GET /data/2.5/weather?q=<city>&units=metric
   OpenWeather-->>LogicApp: 200 OK (JSON)
-  LogicApp->>LogicApp: Parse JSON + convert wind m/s -> km/h
+  LogicApp->>LogicApp: Parse JSON and convert wind m/s → km/h
   LogicApp->>O365: Send email (HTML body)
   O365-->>Client: Email delivered
 
