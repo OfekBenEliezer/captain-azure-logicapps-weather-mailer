@@ -20,12 +20,13 @@
 ## 🧭 Architecture
 ```mermaid
 flowchart LR
-  A[Client or Caller] -->|HTTP POST JSON (city, email)| B[Logic App - HTTP Trigger]
+  A[Client / Caller] -->|HTTP POST city+email| B[Logic App - HTTP Trigger]
   B --> C[HTTP action - OpenWeather API]
   C -->|JSON weather data| D[Parse JSON]
   D --> E[Compose values: temp, feels_like, humidity, wind m/s -> km/h]
   E --> F[Office 365 - Send an email]
   F --> G[Recipient inbox]
+
 
 
 ```markdown
