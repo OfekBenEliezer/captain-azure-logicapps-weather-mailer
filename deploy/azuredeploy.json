@@ -4,7 +4,7 @@
   "parameters": {
     "logicAppName": { "type": "string" },
     "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
-    "openWeatherKey": { "type": "secureString" },
+    "openWeatherKey": { "type": "securestring" }, 
     "office365ConnectionName": { "type": "string", "defaultValue": "office365" },
     "workflowDefinition": { "type": "string" }
   },
