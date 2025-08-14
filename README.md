@@ -18,7 +18,6 @@
 
 ---
 ## 🧭 Architecture
-```mermaid
 flowchart LR
   A[Client / Caller] -->|HTTP POST city+email| B[Logic App - HTTP Trigger]
   B --> C[HTTP action - OpenWeather API]
