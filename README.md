@@ -130,7 +130,3 @@ az deployment group create `
 
 Developed by **[Captain Azure - Ofek Ben Eliezer](https://github.com/OfekBenEliezer)**
 Microsoft Certified Trainer | Azure Architect | AI & Cloud Expert
-
----
-
-אם עדיין לא מוצג, וודא שאין בטעות \`\`\` בתחילת הקובץ או בסופו שמקיפים את כל ה-README.
