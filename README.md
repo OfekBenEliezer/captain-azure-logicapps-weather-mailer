@@ -1,25 +1,38 @@
-````markdown
+הסיבה שזה לא עובד:
+
+1. פתחת את כל ה-README בתוך גדר קוד עם \`\`\`\`markdown בתחילת הקובץ - זה הופך את הכל לטקסט, אז Mermaid לא רץ.
+2. בקטע הדיאגרמות השתמשת ב־`markdown במקום `mermaid.
+3. השארת שורות `classDef ...` מחוץ לבלוק ה-mermaid.
+
+תיקנתי לך הכל. תעתיק את התוכן הבא **כמו שהוא** אל `README.md` – שים לב: אין שום גדר קוד בתחילת הקובץ, וכל דיאגרמה עטופה ב-\`\`\`mermaid בלבד.
+
+---
+
 # 🌤 Azure Logic Apps - Weather to Email
 
 **Weather Mailer** is a clean, ready-to-deploy **Azure Logic App** that takes a city name and an email address, fetches live weather data from [OpenWeather](https://openweathermap.org/api), and sends a well-formatted email using Office 365.
 
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfekBenEliezer%2Fcaptain-azure-logicapps-weather-mailer%2Fmain%2Fdeploy%2Fazuredeploy.json)
+
 ---
 
 ## 🚀 What it does
-1. **HTTP Trigger** receives a JSON payload:
+
+1. **HTTP trigger** receives a JSON payload:
+
    ```json
    { "city": "Tel Aviv", "email": "user@example.com" }
-````
-
-2. **Calls the OpenWeather API** to get the latest weather in metric units (°C).
-3. **Parses and processes** the response - extracting temperature, feels-like temperature, humidity, wind speed, and weather description.
+   ```
+2. **Calls OpenWeather API** in metric units (°C).
+3. **Parses and processes** temperature, feels\_like, humidity, wind speed, and description.
 4. **Converts wind speed** from m/s to km/h.
-5. **Sends a formatted email** through Office 365 containing all the relevant weather details.
+5. **Sends a formatted email** via Office 365.
 
 ---
-## 🧭 Architecture
-```markdown
 
+## 🧭 Architecture
+
+```mermaid
 flowchart LR
   A[Client / Caller] -->|HTTP POST city+email| B[Logic App - HTTP Trigger]
   B --> C[HTTP action - OpenWeather API]
@@ -28,9 +41,15 @@ flowchart LR
   E --> F[Office 365 - Send an email]
   F --> G[Recipient inbox]
 
+  classDef azure fill:#2563eb,stroke:#1e40af,stroke-width:1,color:#fff
+  classDef svc fill:#0ea5e9,stroke:#0369a1,stroke-width:1,color:#fff
+  class B,D,E azure
+  class C,F svc
 ```
 
-```markdown
+## Sequence
+
+```mermaid
 sequenceDiagram
   autonumber
   participant Client
@@ -45,55 +64,62 @@ sequenceDiagram
   LogicApp->>O365: Send email (HTML body)
   O365-->>Client: Email delivered
 ```
-  classDef azure fill:#2563eb,stroke:#1e40af,stroke-width:1,color:#fff
-  classDef svc fill:#0ea5e9,stroke:#0369a1,stroke-width:1,color:#fff
-  class B,D,E azure
-  class C,F svc
 
+---
 
 ## 🗂 Repository Structure
 
 ```
 deploy/
- ├─ azuredeploy.json             # ARM template for deploying the Logic App and connections
+ ├─ azuredeploy.json             # ARM template for Logic App + O365 connection + $connections
  ├─ azuredeploy.parameters.json  # Example parameter file
 workflow/
- └─ logicapp.definition.json     # Full Logic App workflow definition
+ └─ logicapp.definition.json     # Full Logic App workflow definition (WDL)
 docs/
- └─ screenshots / diagrams       # Documentation and images (optional)
+ └─ screenshots / diagrams       # Optional
 ```
 
 ---
 
 ## 📦 Deploy to Azure
 
-Click below to deploy directly to your Azure subscription:
+Use the button at the top or the Azure CLI:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfekBenEliezer%2Fcaptain-azure-logicapps-weather-mailer%2Fmain%2Fdeploy%2Fazuredeploy.json)
+```powershell
+$definition = Get-Content -Raw workflow/logicapp.definition.json
+az login
+az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
+az group create -n rg-logicapps-demo -l westeurope
+az deployment group create `
+  -g rg-logicapps-demo `
+  -f deploy/azuredeploy.json `
+  -p logicAppName="la-weather-mailer" `
+     location="westeurope" `
+     openWeatherKey="<YOUR_OPENWEATHER_KEY>" `
+     office365ConnectionName="office365" `
+     workflowDefinition="$definition"
+```
 
 ---
 
 ## ⚙ Prerequisites
 
-* An active Azure subscription with permissions to deploy resources
-* An [OpenWeather API key](https://home.openweathermap.org/users/sign_up) (free tier available)
-* An Office 365 account with email sending permissions (Microsoft 365 Business Standard / E3 / E5 or equivalent)
+* Active Azure subscription with permissions to deploy resources
+* OpenWeather API key
+* Office 365 account with permission to send email
 
 ---
 
 ## 🛠 How to use after deployment
 
-1. Go to your deployed Logic App in the Azure Portal.
-2. Open the **HTTP Trigger** step and copy the **HTTP POST URL**.
-3. Send a POST request to the URL with the following JSON payload:
+1. Open your Logic App in Azure Portal.
+2. Copy the **HTTP POST URL** from the HTTP trigger.
+3. Send a POST request with:
 
    ```json
-   {
-     "city": "London",
-     "email": "you@example.com"
-   }
+   { "city": "London", "email": "you@example.com" }
    ```
-4. Check your inbox - you should receive a nicely formatted weather report.
+4. Check your inbox for the formatted weather email.
 
 ---
 
@@ -115,4 +141,6 @@ Click below to deploy directly to your Azure subscription:
 Developed by **[Captain Azure - Ofek Ben Eliezer](https://github.com/OfekBenEliezer)**
 Microsoft Certified Trainer | Azure Architect | AI & Cloud Expert
 
-```
+---
+
+אם עדיין לא מוצג, וודא שאין בטעות \`\`\` בתחילת הקובץ או בסופו שמקיפים את כל ה-README.
