@@ -1,0 +1,11 @@
+@"
+node_modules/
+dist/
+.vscode/
+.DS_Store
+*.local.json
+*.secrets.json
+*.user
+*.env
+deploy/*secrets*.json
+"@ | Out-File -Encoding utf8 .gitignore

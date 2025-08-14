@@ -1,0 +1,97 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "openWeatherKey": { "type": "String" },
+    "office365_connection_name": { "type": "String", "defaultValue": "office365" },
+    "$connections": { "type": "Object" }
+  },
+  "triggers": {
+    "When_a_HTTP_request_is_received": {
+      "type": "Request",
+      "kind": "Http",
+      "inputs": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "city": { "type": "string", "minLength": 1 },
+            "email": { "type": "string", "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$" }
+          },
+          "required": ["city", "email"]
+        }
+      }
+    }
+  },
+  "actions": {
+    "HTTP": {
+      "type": "Http",
+      "runAfter": {},
+      "inputs": {
+        "method": "GET",
+        "uri": "@concat('https://api.openweathermap.org/data/2.5/weather?q=', uriComponent(triggerBody()?['city']), '&appid=', parameters('openWeatherKey'), '&units=metric')"
+      },
+      "runtimeConfiguration": {
+        "contentTransfer": { "transferMode": "Chunked" }
+      }
+    },
+    "Parse_JSON": {
+      "type": "ParseJson",
+      "runAfter": { "HTTP": ["Succeeded"] },
+      "inputs": {
+        "content": "@body('HTTP')",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "main": {
+              "type": "object",
+              "properties": {
+                "temp": { "type": "number" },
+                "feels_like": { "type": "number" },
+                "humidity": { "type": "number" }
+              },
+              "required": ["temp", "feels_like", "humidity"]
+            },
+            "wind": {
+              "type": "object",
+              "properties": {
+                "speed": { "type": "number" }
+              },
+              "required": ["speed"]
+            },
+            "weather": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": { "type": "string" },
+                  "icon": { "type": "string" }
+                }
+              }
+            }
+          },
+          "required": ["name", "main", "wind"]
+        }
+      }
+    },
+    "Send_an_email_(V2)": {
+      "type": "ApiConnection",
+      "runAfter": { "Parse_JSON": ["Succeeded"] },
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')[parameters('office365_connection_name')]['connectionId']"
+          }
+        },
+        "method": "post",
+        "path": "/v2/Mail",
+        "body": {
+          "To": "@{triggerBody()?['email']}",
+          "Subject": "Weather Update for @{body('Parse_JSON')?['name']}",
+          "Body": "<h2 style='color:#0078D4;'>🌤 Weather Update - @{body('Parse_JSON')?['name']}</h2><p><strong>Current temperature:</strong> @{body('Parse_JSON')?['main']?['temp']}°C</p><p><strong>Feels like:</strong> @{body('Parse_JSON')?['main']?['feels_like']}°C</p><p><strong>Humidity:</strong> @{body('Parse_JSON')?['main']?['humidity']}%</p><p><strong>Wind Speed:</strong> @{formatNumber(mul(body('Parse_JSON')?['wind']?['speed'], 3.6), '0.0')} km/h</p><p><strong>Condition:</strong> @{coalesce(body('Parse_JSON')?['weather'][0]?['description'],'N/A')}</p><hr style='margin-top:16px;'><p style='font-size:12px;color:#888;'>Data by OpenWeather - Logic App by Ofek</p>"
+        }
+      }
+    }
+  },
+  "outputs": {}
+}
