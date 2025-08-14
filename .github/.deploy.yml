@@ -1,0 +1,43 @@
+name: Deploy Logic App
+on:
+  workflow_dispatch:
+    inputs:
+      logicAppName:
+        description: 'Logic App name'
+        required: true
+        default: 'la-weather-mailer'
+      location:
+        description: 'Azure location'
+        required: true
+        default: 'westeurope'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Load workflow definition
+        id: def
+        run: |
+          DEF="$(cat workflow/logicapp.definition.json)"
+          echo "DEF<<EOF" >> $GITHUB_OUTPUT
+          echo "$DEF"     >> $GITHUB_OUTPUT
+          echo "EOF"      >> $GITHUB_OUTPUT
+
+      - name: Deploy
+        uses: azure/arm-deploy@v2
+        with:
+          subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
+          template: deploy/azuredeploy.json
+          parameters: >
+            logicAppName=${{ github.event.inputs.logicAppName }}
+            location=${{ github.event.inputs.location }}
+            openWeatherKey=${{ secrets.OPENWEATHER_KEY }}
+            office365ConnectionName=office365
+            workflowDefinition='${{ steps.def.outputs.DEF }}'
