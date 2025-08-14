@@ -1,13 +1,3 @@
-הסיבה שזה לא עובד:
-
-1. פתחת את כל ה-README בתוך גדר קוד עם \`\`\`\`markdown בתחילת הקובץ - זה הופך את הכל לטקסט, אז Mermaid לא רץ.
-2. בקטע הדיאגרמות השתמשת ב־`markdown במקום `mermaid.
-3. השארת שורות `classDef ...` מחוץ לבלוק ה-mermaid.
-
-תיקנתי לך הכל. תעתיק את התוכן הבא **כמו שהוא** אל `README.md` – שים לב: אין שום גדר קוד בתחילת הקובץ, וכל דיאגרמה עטופה ב-\`\`\`mermaid בלבד.
-
----
-
 # 🌤 Azure Logic Apps - Weather to Email
 
 **Weather Mailer** is a clean, ready-to-deploy **Azure Logic App** that takes a city name and an email address, fetches live weather data from [OpenWeather](https://openweathermap.org/api), and sends a well-formatted email using Office 365.
