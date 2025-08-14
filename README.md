@@ -18,6 +18,8 @@
 
 ---
 ## 🧭 Architecture
+```markdown
+
 flowchart LR
   A[Client / Caller] -->|HTTP POST city+email| B[Logic App - HTTP Trigger]
   B --> C[HTTP action - OpenWeather API]
@@ -26,11 +28,9 @@ flowchart LR
   E --> F[Office 365 - Send an email]
   F --> G[Recipient inbox]
 
-
+```
 
 ```markdown
-## Sequence
-```mermaid
 sequenceDiagram
   autonumber
   participant Client
@@ -38,20 +38,13 @@ sequenceDiagram
   participant OpenWeather as OpenWeather API
   participant O365 as Office 365
 
-  Client->>LogicApp: HTTP POST (city, email)
+  Client->>LogicApp: HTTP POST city+email
   LogicApp->>OpenWeather: GET /data/2.5/weather?q=<city>&units=metric
   OpenWeather-->>LogicApp: 200 OK (JSON)
   LogicApp->>LogicApp: Parse JSON + convert wind m/s -> km/h
   LogicApp->>O365: Send email (HTML body)
   O365-->>Client: Email delivered
-
-  Client->>LogicApp: HTTP POST { city, email }
-  LogicApp->>OpenWeather: GET /data/2.5/weather?q=<city>&units=metric
-  OpenWeather-->>LogicApp: 200 OK (JSON)
-  LogicApp->>LogicApp: Parse JSON and convert wind m/s → km/h
-  LogicApp->>O365: Send email (HTML body)
-  O365-->>Client: Email delivered
-
+```
   classDef azure fill:#2563eb,stroke:#1e40af,stroke-width:1,color:#fff
   classDef svc fill:#0ea5e9,stroke:#0369a1,stroke-width:1,color:#fff
   class B,D,E azure
