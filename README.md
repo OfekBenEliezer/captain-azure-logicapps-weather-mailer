@@ -17,6 +17,19 @@
 5. **Sends a formatted email** through Office 365 containing all the relevant weather details.
 
 ---
+flowchart LR
+  A[Client or Caller] -->|HTTP POST JSON { city, email }| B[Logic App - HTTP Trigger]
+  B --> C[HTTP action - OpenWeather API]
+  C -->|JSON weather data| D[Parse JSON]
+  D --> E[Compose values - temp, feels_like, humidity, wind m/s → km/h]
+  E --> F[Office 365 - Send an email]
+  F --> G[Recipient Inbox]
+
+  classDef azure fill:#2563eb,stroke:#1e40af,stroke-width:1,color:#fff
+  classDef svc fill:#0ea5e9,stroke:#0369a1,stroke-width:1,color:#fff
+  class B,D,E azure
+  class C,F svc
+
 
 ## 🗂 Repository Structure
 
